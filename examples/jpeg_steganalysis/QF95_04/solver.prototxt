@@ -1,0 +1,14 @@
+net: "CNN.prototxt"
+test_iter: 1000
+test_interval: 5000
+base_lr: 0.001
+lr_policy: "step"
+stepsize: 5000
+gamma: 0.9
+display: 1
+max_iter: 90001
+momentum: 0.9
+weight_decay: 0.0005
+solver_mode: GPU
+use_polyak: true
+num_iter_polyak: 256

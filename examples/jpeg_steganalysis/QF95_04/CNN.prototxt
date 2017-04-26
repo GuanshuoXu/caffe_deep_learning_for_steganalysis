@@ -1,0 +1,498 @@
+name: "CNN"
+####################### input #############################
+layer {
+  top:"data" top:"label"
+  name:"CNN_input" type:"ImageDataSteganalysisJpegDct"
+  include {phase:TRAIN}
+  image_data_steganalysis_jpeg_dct_param {
+    source:"/home/forensics/stegData/rand_num_generators/train_halfhalf.txt"
+    cover_dir:"/home/forensics/stegData/steganalysis-jpeg/cover_QF95/"
+    stego_dir:"/home/forensics/stegData/steganalysis-jpeg/JUNIWARD/stego_QF95/0.4bpp/"
+    batch_size:32 shuffle:true rand_mirror_rotate:true
+  }
+}
+layer {
+  top:"data" top:"label"
+  name:"CNN_input" type:"ImageDataSteganalysisJpegDct"
+  include {phase:TEST}
+  image_data_steganalysis_jpeg_dct_param {
+    source:"/home/forensics/stegData/rand_num_generators/test_halfhalf.txt"
+    cover_dir:"/home/forensics/stegData/steganalysis-jpeg/cover_QF95/"
+    stego_dir:"/home/forensics/stegData/steganalysis-jpeg/JUNIWARD/stego_QF95/0.4bpp/"
+    batch_size:10 shuffle:false rand_mirror_rotate:false
+  }
+}
+layer {
+  bottom:"data" top:"dct2spatial"
+  name:"dct2spatial" type:"BdctToSpatial"
+  bdct_to_spatial_param {quality:95}
+}
+
+####################### pre-process #############################
+layer {
+  bottom:"dct2spatial" top:"conv1"
+  name:"conv1" type:"Convolution"
+  param {lr_mult:0 decay_mult:0}
+  convolution_param {num_output:16 pad:1 kernel_size:4 stride:1 weight_filler {type:"dct4"} bias_term:false }
+}
+layer {
+  bottom:"conv1" top:"conv1"
+  name:"quanttruncabs" type:"QuantTruncAbs"
+  quant_trunc_abs_param {process:TRUNCABS threshold:8}
+}
+
+############################ 512 #############################
+layer {
+  bottom:"conv1" top:"conv1_proj"
+  name:"conv1_proj" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:24 pad:1 kernel_size:3 stride:2 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv1_proj" top:"conv1_proj" 
+  name:"norm1_proj" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+
+layer {
+  bottom:"conv1" top:"conv512_1"
+  name:"conv512_1" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:12 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv512_1" top:"conv512_1" 
+  name:"norm512_1" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom:"conv512_1" top:"conv512_1"
+  name:"relu512_1" type:"ReLURecover"
+}
+
+########################## 512 to 256 ##########################
+layer {
+  bottom:"conv512_1" top:"conv512_to_256"
+  name:"conv512_to_256" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:24 pad:1 kernel_size:3 stride:2 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv512_to_256" top:"conv512_to_256" 
+  name:"norm512_to_256" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom: "conv1_proj" bottom: "conv512_to_256" top: "res512_to_256"
+  name: "res512_to_256" type: "Eltwise"
+}
+layer {
+  bottom:"res512_to_256" top:"res512_to_256"
+  name:"relu512_to_256" type:"ReLU"
+}
+
+############################ 256 ##############################
+layer {
+  bottom:"res512_to_256" top:"conv256_1"
+  name:"conv256_1" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:24 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv256_1" top:"conv256_1" 
+  name:"norm256_1" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom:"conv256_1" top:"conv256_1"
+  name:"relu256_1" type:"ReLURecover"
+}
+
+layer {
+  bottom:"conv256_1" top:"conv256_2"
+  name:"conv256_2" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:24 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv256_2" top:"conv256_2" 
+  name:"norm256_2" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom: "res512_to_256" bottom: "conv256_2" top: "res256_2"
+  name: "res256_2" type: "Eltwise"
+}
+layer {
+  bottom:"res256_2" top:"res256_2"
+  name:"relu256_2" type:"ReLU"
+}
+
+layer {
+  bottom:"res256_2" top:"res256_2_proj"
+  name:"res256_2_proj" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:48 pad:1 kernel_size:3 stride:2 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"res256_2_proj" top:"res256_2_proj" 
+  name:"norm256_2_proj" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+
+layer {
+  bottom:"res256_2" top:"conv256_3"
+  name:"conv256_3" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:24 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv256_3" top:"conv256_3" 
+  name:"norm256_3" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom:"conv256_3" top:"conv256_3"
+  name:"relu256_3" type:"ReLURecover"
+}
+
+########################## 256 to 128 ###########################
+layer {
+  bottom:"conv256_3" top:"conv256_to_128"
+  name:"conv256_to_128" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:48 pad:1 kernel_size:3 stride:2 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv256_to_128" top:"conv256_to_128" 
+  name:"norm256_to_128" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom: "res256_2_proj" bottom: "conv256_to_128" top: "res256_to_128"
+  name: "res256_to_128" type: "Eltwise"
+}
+layer {
+  bottom:"res256_to_128" top:"res256_to_128"
+  name:"relu256_to_128" type:"ReLU"
+}
+
+########################### 128 ################################
+layer {
+  bottom:"res256_to_128" top:"conv128_1"
+  name:"conv128_1" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:48 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv128_1" top:"conv128_1" 
+  name:"norm128_1" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom:"conv128_1" top:"conv128_1"
+  name:"relu128_1" type:"ReLURecover"
+}
+
+layer {
+  bottom:"conv128_1" top:"conv128_2"
+  name:"conv128_2" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:48 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv128_2" top:"conv128_2" 
+  name:"norm128_2" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom: "res256_to_128" bottom: "conv128_2" top: "res128_2"
+  name: "res128_2" type: "Eltwise"
+}
+layer {
+  bottom:"res128_2" top:"res128_2"
+  name:"relu128_2" type:"ReLU"
+}
+
+layer {
+  bottom:"res128_2" top:"res128_2_proj"
+  name:"res128_2_proj" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:96 pad:1 kernel_size:3 stride:2 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"res128_2_proj" top:"res128_2_proj" 
+  name:"norm128_2_proj" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+
+layer {
+  bottom:"res128_2" top:"conv128_3"
+  name:"conv128_3" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:48 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv128_3" top:"conv128_3" 
+  name:"norm128_3" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom:"conv128_3" top:"conv128_3"
+  name:"relu128_3" type:"ReLURecover"
+}
+
+########################## 128 to 64 ############################
+layer {
+  bottom:"conv128_3" top:"conv128_to_64"
+  name:"conv128_to_64" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:96 pad:1 kernel_size:3 stride:2 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv128_to_64" top:"conv128_to_64" 
+  name:"norm128_to_64" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom: "res128_2_proj" bottom: "conv128_to_64" top: "res128_to_64"
+  name: "res128_to_64" type: "Eltwise"
+}
+layer {
+  bottom:"res128_to_64" top:"res128_to_64"
+  name:"relu128_to_64" type:"ReLU"
+}
+
+############################# 64 ###############################
+layer {
+  bottom:"res128_to_64" top:"conv64_1"
+  name:"conv64_1" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:96 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv64_1" top:"conv64_1" 
+  name:"norm64_1" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom:"conv64_1" top:"conv64_1"
+  name:"relu64_1" type:"ReLURecover"
+}
+
+layer {
+  bottom:"conv64_1" top:"conv64_2"
+  name:"conv64_2" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:96 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv64_2" top:"conv64_2" 
+  name:"norm64_2" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom: "res128_to_64" bottom: "conv64_2" top: "res64_2"
+  name: "res64_2" type: "Eltwise"
+}
+layer {
+  bottom:"res64_2" top:"res64_2"
+  name:"relu64_2" type:"ReLU"
+}
+
+layer {
+  bottom:"res64_2" top:"res64_2_proj"
+  name:"res64_2_proj" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:192 pad:1 kernel_size:3 stride:2 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"res64_2_proj" top:"res64_2_proj" 
+  name:"norm64_2_proj" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+
+layer {
+  bottom:"res64_2" top:"conv64_3"
+  name:"conv64_3" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:96 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv64_3" top:"conv64_3" 
+  name:"norm64_3" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom:"conv64_3" top:"conv64_3"
+  name:"relu64_3" type:"ReLURecover"
+}
+
+########################### 64 to 32 #############################
+layer {
+  bottom:"conv64_3" top:"conv64_to_32"
+  name:"conv64_to_32" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:192 pad:1 kernel_size:3 stride:2 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv64_to_32" top:"conv64_to_32" 
+  name:"norm64_to_32" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom: "res64_2_proj" bottom: "conv64_to_32" top: "res64_to_32"
+  name: "res64_to_32" type: "Eltwise"
+}
+layer {
+  bottom:"res64_to_32" top:"res64_to_32"
+  name:"relu64_to_32" type:"ReLU"
+}
+
+############################# 32 ###############################
+layer {
+  bottom:"res64_to_32" top:"conv32_1"
+  name:"conv32_1" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:192 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv32_1" top:"conv32_1" 
+  name:"norm32_1" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom:"conv32_1" top:"conv32_1"
+  name:"relu32_1" type:"ReLURecover"
+}
+
+layer {
+  bottom:"conv32_1" top:"conv32_2"
+  name:"conv32_2" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:192 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv32_2" top:"conv32_2" 
+  name:"norm32_2" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom: "res64_to_32" bottom: "conv32_2" top: "res32_2"
+  name: "res32_2" type: "Eltwise"
+}
+layer {
+  bottom:"res32_2" top:"res32_2"
+  name:"relu32_2" type:"ReLU"
+}
+
+layer {
+  bottom:"res32_2" top:"res32_2_proj"
+  name:"res32_2_proj" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:384 pad:1 kernel_size:3 stride:2 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"res32_2_proj" top:"res32_2_proj" 
+  name:"norm32_2_proj" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+
+layer {
+  bottom:"res32_2" top:"conv32_3"
+  name:"conv32_3" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:192 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv32_3" top:"conv32_3" 
+  name:"norm32_3" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom:"conv32_3" top:"conv32_3"
+  name:"relu32_3" type:"ReLURecover"
+}
+
+########################### 32 to 16 #############################
+layer {
+  bottom:"conv32_3" top:"conv32_to_16"
+  name:"conv32_to_16" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:384 pad:1 kernel_size:3 stride:2 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv32_to_16" top:"conv32_to_16" 
+  name:"norm32_to_16" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom: "res32_2_proj" bottom: "conv32_to_16" top: "res32_to_16"
+  name: "res32_to_16" type: "Eltwise"
+}
+layer {
+  bottom:"res32_to_16" top:"res32_to_16"
+  name:"relu32_to_16" type:"ReLU"
+}
+
+############################ 16 #################################
+layer {
+  bottom:"res32_to_16" top:"conv16_1"
+  name:"conv16_1" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:384 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv16_1" top:"conv16_1" 
+  name:"norm16_1" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom:"conv16_1" top:"conv16_1"
+  name:"relu16_1" type:"ReLURecover"
+}
+
+layer {
+  bottom:"conv16_1" top:"conv16_2"
+  name:"conv16_2" type:"Convolution"
+  param {lr_mult:1 decay_mult:0}
+  convolution_param {num_output:384 pad:1 kernel_size:3 stride:1 weight_filler {type:"gaussian" std:0.01} bias_term:false}
+}
+layer {
+  bottom:"conv16_2" top:"conv16_2" 
+  name:"norm16_2" type:"BNConv"
+  param {lr_mult:1 decay_mult:0} param {lr_mult:1 decay_mult:0} param {lr_mult:0 decay_mult:0} param {lr_mult:0 decay_mult:0}
+}
+layer {
+  bottom: "res32_to_16" bottom: "conv16_2" top: "res16_2"
+  name: "res16_2" type: "Eltwise"
+}
+layer {
+  bottom:"res16_2" top:"res16_2"
+  name:"relu16_2" type:"ReLU"
+}
+
+############################ POOL #################################
+layer {
+  bottom:"res16_2" top:"global_pool"
+  name:"global_pool" type:"Pooling"
+  pooling_param {pool:AVE kernel_size:16 stride:1}
+}
+
+############################ FC #################################
+layer {
+  bottom:"global_pool" top:"fc"
+  name:"fc" type:"InnerProduct"
+  param {lr_mult:1} param {lr_mult:2}
+  inner_product_param {num_output:2 weight_filler {type:"xavier"} bias_filler {type:"constant"}}
+}
+
+layer {
+  bottom:"fc" bottom:"label" top:"accuracy"
+  name:"accuracy" type:"Accuracy"
+  include {phase:TEST}
+}
+layer {
+  bottom:"fc" bottom:"label" top:"loss"
+  name:"loss" type:"SoftmaxWithLoss"
+}
