@@ -1,15 +1,29 @@
-# Deep CNN for JPEG steganalysis
+# Introduction
 
 Source code to reproduce the paper accepted by IH&MMSEC2017.
 
 The DCT kernels are saved in /kernels. The directory to access them are hard-coded in /include/caffe/filler.hpp
 . So before building, please change the directories to make sure the DCT kernels can be found. 
 
+# Features
+This code has following features compared with the official Caffe.
+
+1) Memory-efficient BN-ReLU combo (bn_conv and relu_recover). Please see bn_conv_layer and relu_recover_layer.
+2) More stable testing performance (important for running average based BN) by parameter-wise averaging across N training iterations before testing. Please see the Step(int iters) function in solver.cpp. Usage: set use_polyak to true and  num_iter_polyak in solver.prototxt.
+3) image_data_steganalysis_jpeg_dct_layer: a new input layer for jpeg_steganalysis that read jpeg images from hard drive and output BDCT coefficients. This layer is able to do per-epoch random shuffling and syncronized random mirroring and rotation for each cover-stego pair. Please refer to image_data_steganalysis_jpeg_dct_layer.cpp for more details.
+4) bdct_to_spatial_layer to tranform BDCT coeffients to spatial domain.
+5) quant_trunc_abs_layer to perform element-wise quantization, trunction and absolute operations.
+
 # Examples
+Two examples are provided in examples/jpeg/steganalysis for QF75 and QF95 respectively.
+
+1) Change the Caffe dir in cmd.sh and cmd_test.sh. The cmd_test.sh is used to output probabilities only.
+2) Set the source, cover_dir, and stego_dir in the input layer.
+3) The source is a txt file, each line contain a number (from 1 ~ 10000 for BOSSBase). See the txt files in /rand_num_generators. cover_dir and stego_dir simply contain images in '.jpg' format.
 
 
 # Citation
 
 Please cite the following paper if the code helps your research.
 
-Please also cite two additional papers if you are using the BN-RELU (bn_conv and relu_recover) combo.
+Please also cite two additional papers if you are using the BN-RELU combo (bn_conv and relu_recover).
