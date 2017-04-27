@@ -26,4 +26,12 @@ Two examples are provided in examples/jpeg/steganalysis for QF75 and QF95 respec
 
 Please cite the following paper if the code helps your research.
 
-Please also cite two additional papers if you are using the BN-RELU combo (bn_conv and relu_recover).
+G. Xu, “Deep Convolutional Neural Network to Detect J-UNIWARD,” in Proc. 5th ACM Workshop Inf. Hiding Multimedia Secur. (IH&MMSec), 2017, accepted.
+
+
+Please cite two additional papers if you are using the BN-RELU combo (bn_conv and relu_recover).
+
+G. Xu, H. Wu, and Y. Q. Shi, “Ensemble of CNNs for steganalysis: An empirical study,” in Proc. 4th ACM Workshop Inf. Hiding Multimedia Secur. (IH&MMSec), 2016, pp. 103–107.
+
+G. Xu, H. Wu, and Y. Q. Shi, “Structural design of convolutional neural networks for steganalysis,” IEEE Signal Process. Lett., vol. 23, no. 5, pp. 708–712, Mar. 2016.
+
