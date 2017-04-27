@@ -1,6 +1,6 @@
 # Introduction
 
-Source code to reproduce the paper accepted by IH&MMSEC2017.
+Source code to reproduce the results in
 
 G. Xu, “Deep Convolutional Neural Network to Detect J-UNIWARD,” in Proc. 5th ACM Workshop Inf. Hiding Multimedia Secur. (IH&MMSec), 2017, accepted.
 
