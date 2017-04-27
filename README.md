@@ -21,7 +21,7 @@ This code has following features compared with the official Caffe.
 5) quant_trunc_abs_layer to perform element-wise quantization, trunction and absolute operations.
 
 # Examples
-Two examples are provided in examples/jpeg/steganalysis for QF75 and QF95 respectively.
+Two examples are provided in examples/jpeg_steganalysis for QF75 and QF95 respectively.
 
 1) Change the Caffe dir in cmd.sh and cmd_test.sh. The cmd_test.sh is used to output probabilities only.
 2) Set the source, cover_dir, and stego_dir in the input layer (in CNN.prototxt).
