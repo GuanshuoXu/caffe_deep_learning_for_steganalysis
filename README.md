@@ -2,8 +2,14 @@
 
 Source code to reproduce the paper accepted by IH&MMSEC2017.
 
+G. Xu, “Deep Convolutional Neural Network to Detect J-UNIWARD,” in Proc. 5th ACM Workshop Inf. Hiding Multimedia Secur. (IH&MMSec), 2017, accepted.
+
+# Building Instructions
+
 The DCT kernels are saved in /kernels. The directory to access them are hard-coded in /include/caffe/filler.hpp
-. So before building, please change the directories to make sure the DCT kernels can be found. 
+. So before building, please change the directories to make sure the DCT kernels can be found.
+
+The code will compile with cudnnv6. If you are using cudnnv5, see the instruction in /cudnn_hpp_version
 
 # Features
 This code has following features compared with the official Caffe.
@@ -27,6 +33,7 @@ Two examples are provided in examples/jpeg/steganalysis for QF75 and QF95 respec
 Please cite the following paper if the code helps your research.
 
 G. Xu, “Deep Convolutional Neural Network to Detect J-UNIWARD,” in Proc. 5th ACM Workshop Inf. Hiding Multimedia Secur. (IH&MMSec), 2017, accepted.
+
 
 
 Please cite two additional papers if you are using the BN-RELU combo (bn_conv and relu_recover).
