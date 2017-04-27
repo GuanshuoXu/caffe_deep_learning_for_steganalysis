@@ -16,7 +16,7 @@ This code has following features compared with the official Caffe.
 
 1) Memory-efficient BN-ReLU combo (bn_conv and relu_recover). Please see bn_conv_layer and relu_recover_layer.
 2) More stable testing performance (important for running average based BN) by parameter-wise averaging across N training iterations before testing. Please see the Step(int iters) function in solver.cpp. Usage: set use_polyak to true and  num_iter_polyak in solver.prototxt.
-3) image_data_steganalysis_jpeg_dct_layer: a new input layer for jpeg_steganalysis that read jpeg images from hard drive and output BDCT coefficients. This layer is able to do per-epoch random shuffling and syncronized random mirroring and rotation for each cover-stego pair. Please refer to image_data_steganalysis_jpeg_dct_layer.cpp for more details.
+3) image_data_steganalysis_jpeg_dct_layer: a new input layer for jpeg_steganalysis that read jpeg images from hard drive and output BDCT coefficients. This layer is able to do per-epoch random shuffling and syncronized random mirroring and rotation for each cover-stego pair. This layer requires cover and its corresponding stego to have the save file name. Please refer to image_data_steganalysis_jpeg_dct_layer.cpp for more details.
 4) bdct_to_spatial_layer to tranform BDCT coeffients to spatial domain.
 5) quant_trunc_abs_layer to perform element-wise quantization, trunction and absolute operations.
 
