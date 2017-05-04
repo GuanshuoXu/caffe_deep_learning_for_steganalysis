@@ -271,13 +271,7 @@ void Net<Dtype>::Init(const NetParameter& in_param) {
 	        //<< "This network produces output " << *it;
 
     const string& blob_name = *it;
-    if (blob_name != std::string("conv1") && blob_name != std::string("conv2")
-  			&& blob_name != std::string("conv3")
-  			&& blob_name != std::string("conv4")
-  			&& blob_name != std::string("conv5")
-  			&& blob_name != std::string("conv6")
-  			&& blob_name != std::string("conv7")
-  			&& blob_name != std::string("pool6")) {
+    if (blob_name != std::string("conv1")) {
         net_output_blobs_.push_back(blobs_[blob_name_to_idx[*it]].get());
         net_output_blob_indices_.push_back(blob_name_to_idx[*it]);
 
@@ -456,13 +450,7 @@ int Net<Dtype>::AppendBottom(const NetParameter& param, const int layer_id,
 
 
 
-  if (blob_name != std::string("conv1") && blob_name != std::string("conv2")
-			&& blob_name != std::string("conv3")
-			&& blob_name != std::string("conv4")
-			&& blob_name != std::string("conv5")
-			&& blob_name != std::string("conv6")
-			&& blob_name != std::string("conv7")
-			&& blob_name != std::string("pool6")) {
+  if (blob_name != std::string("conv1")) {
 		available_blobs->erase(blob_name);
 	}
 
