@@ -4,6 +4,8 @@ Source code to reproduce the results in
 
 G. Xu, “Deep Convolutional Neural Network to Detect J-UNIWARD,” in Proc. 5th ACM Workshop Inf. Hiding Multimedia Secur. (IH&MMSec), 2017, accepted.
 
+https://arxiv.org/abs/1704.08378
+
 # Building Instructions
 
 The DCT kernels are saved in /kernels. The directory to access them are hard-coded in /include/caffe/filler.hpp
