@@ -67,27 +67,6 @@ void InsertSplits(const NetParameter& param, NetParameter* param_split) {
 				if (blob_name == std::string("conv1")) {
 					continue;
 				}
-				if (blob_name == std::string("conv2")) {
-					continue;
-				}
-				if (blob_name == std::string("conv3")) {
-					continue;
-				}
-				if (blob_name == std::string("conv4")) {
-					continue;
-				}
-				if (blob_name == std::string("conv5")) {
-					continue;
-				}
-				if (blob_name == std::string("conv6")) {
-					continue;
-				}
-				if (blob_name == std::string("conv7")) {
-					continue;
-				}
-				if (blob_name == std::string("pool6")) {
-					continue;
-				}
 				///////////////////////////////////////
 
 
@@ -106,27 +85,6 @@ void InsertSplits(const NetParameter& param, NetParameter* param_split) {
 
 		///////////////////////////////////////
 		if (blob_name == std::string("conv1")) {
-			continue;
-		}
-		if (blob_name == std::string("conv2")) {
-			continue;
-		}
-		if (blob_name == std::string("conv3")) {
-			continue;
-		}
-		if (blob_name == std::string("conv4")) {
-			continue;
-		}
-		if (blob_name == std::string("conv5")) {
-			continue;
-		}
-		if (blob_name == std::string("conv6")) {
-			continue;
-		}
-		if (blob_name == std::string("conv7")) {
-			continue;
-		}
-		if (blob_name == std::string("pool6")) {
 			continue;
 		}
 		///////////////////////////////////////
