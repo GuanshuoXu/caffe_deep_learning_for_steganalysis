@@ -167,20 +167,15 @@ void FakeEmbedJpegLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 
 		Blob<Dtype> rand_map_location_inter(num_ / 2, channels_, height_,
 				width_);
-		/*caffe_gpu_set(rand_map_location_inter.count(), Dtype(0),
-				rand_map_location_inter.mutable_gpu_data());*/
 		caffe_gpu_rng_uniform(rand_map_location_inter.count(), Dtype(0),
 				Dtype(1), rand_map_location_inter.mutable_gpu_data());
 
 		Blob<Dtype> rand_map_operation(num_ / 2, channels_, height_,
 				width_);
-		/*caffe_gpu_set(rand_map_operation.count(), Dtype(0),
-				rand_map_operation.mutable_gpu_data());*/
 		caffe_gpu_rng_uniform(rand_map_operation.count(), Dtype(0),
 				Dtype(1), rand_map_operation.mutable_gpu_data());
 
 		Blob<Dtype> temp(num_, channels_, height_, width_);
-		/*caffe_gpu_set(temp.count(), Dtype(0), temp.mutable_gpu_data());*/
 
 		for (int i = 0; i < num_; i += 2) {
 			caffe_copy(count * 2 / num_, bottom_data + bottom[0]->offset(i),
@@ -200,8 +195,6 @@ void FakeEmbedJpegLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
 		} else {
 			Blob<Dtype> rand_map_location_intra(num_ / 2, channels_, height_,
 					width_);
-			/*caffe_gpu_set(rand_map_location_intra.count(), Dtype(0),
-					rand_map_location_intra.mutable_gpu_data());*/
 			caffe_gpu_rng_uniform(rand_map_location_intra.count(), Dtype(0),
 					Dtype(1), rand_map_location_intra.mutable_gpu_data());
 
